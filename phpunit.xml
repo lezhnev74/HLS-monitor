@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        colors="true"
+        convertErrorsToExceptions="true"
+        processIsolation="false"
+        stopOnError="true"
+        strict="false"
+        verbose="true"
+
+>
+
+
+    <testsuites>
+        <testsuite name="AllTests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+</phpunit>

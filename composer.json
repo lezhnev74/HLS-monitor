@@ -1,0 +1,23 @@
+{
+  "name": "lezhnev74/hls-monitor",
+  "description": "Console script to monitor that HLS links are accessible (supports adaptive streaming)",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Dmitriy Lezhnev",
+      "email": "lezhnev.work@gmail.com"
+    }
+  ],
+  "require": {
+    "webmozart/console": "~1.0@beta"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.5.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Lezhnev74\\HLSMonitor\\": "src/"
+    }
+  }
+}
