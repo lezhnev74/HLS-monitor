@@ -1,8 +1,8 @@
 <?php
-namespace Lezhnev74\HLSMonitor\Playlist;
+namespace Lezhnev74\HLSMonitor\Data\Playlist;
 
 
-use Lezhnev74\HLSMonitor\Stream\Stream;
+use Lezhnev74\HLSMonitor\Data\Stream\Stream;
 
 class Playlist
 {
@@ -73,7 +73,7 @@ class Playlist
                 // do not set empty row, transform those to NULLs
                 $resolution = $p['resolution'] ? strlen($p['resolution']) ? $p['resolution'] : null : null;
                 $bandwidth  = $p['bandwidth'] ? strlen($p['bandwidth']) ? $p['bandwidth'] : null : null;
-                
+    
                 $streams[] = new Stream($url, $resolution, $bandwidth);
             }
             

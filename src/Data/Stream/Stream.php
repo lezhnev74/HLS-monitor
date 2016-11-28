@@ -1,33 +1,36 @@
 <?php
 
-namespace Lezhnev74\HLSMonitor\Stream;
+namespace Lezhnev74\HLSMonitor\Data\Stream;
+
+use Lezhnev74\HLSMonitor\Data\Playlist\InvalidPlaylistFormat;
 
 class Stream
 {
-
+    
     private $resolution;
     private $bandwidth;
     private $url;
-
+    
     /**
      * Stream constructor.
+     *
      * @param $resolution
      * @param $bandwidth
      * @param $url
      */
     public function __construct(string $url, string $resolution = null, string $bandwidth = null)
     {
-
+        
         // Validate Url
         if (filter_var($url, FILTER_VALIDATE_URL) === false) {
             throw new \InvalidArgumentException("Stream URL is not valid");
         }
-
+        
         $this->resolution = $resolution;
-        $this->bandwidth = $bandwidth;
-        $this->url = $url;
+        $this->bandwidth  = $bandwidth;
+        $this->url        = $url;
     }
-
+    
     /**
      * @return string
      */
@@ -35,7 +38,7 @@ class Stream
     {
         return $this->resolution;
     }
-
+    
     /**
      * @return string
      */
@@ -43,7 +46,7 @@ class Stream
     {
         return $this->bandwidth;
     }
-
+    
     /**
      * @return string
      */
@@ -51,6 +54,5 @@ class Stream
     {
         return $this->url;
     }
-
-
+        
 }
