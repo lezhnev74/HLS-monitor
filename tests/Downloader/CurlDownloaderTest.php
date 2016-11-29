@@ -34,4 +34,34 @@ class CurlDownloaderTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($limit, strlen($content));
     }
     
+    function test_downloader_will_retry_on_fail()
+    {
+        $retries    = 1;
+        $timeout    = 1;
+        $downloader = $this->getMockBuilder(CurlDownloader::class)
+                           ->setConstructorArgs([
+                                                    $retries,
+                                                    $timeout,
+                                                ])
+                           ->getMock();
+        
+        $downloader->max_retries = $retries;
+        
+        $callback = function($arg) use ($retries) {
+            static $made_requests = 0;
+            $made_requests++;
+            // last retry must succeed
+            if($made_requests == ($retries + 1)) {
+                return "GOOD";
+            } else {
+                throw new UrlIsNotAccessible();
+            }
+        };
+        $downloader->method('downloadBytes')->will($this->returnCallback($callback));
+        $content = $downloader->downloadFullFile("any");
+        
+        $this->assertEquals("GOOD", $content);
+        
+    }
+    
 }

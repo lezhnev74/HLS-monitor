@@ -13,7 +13,6 @@ class CheckStreamAvailable implements Service
     private $stream;
     private $downloader;
     
-    
     public function __construct(Stream $stream, Downloader $downloader)
     {
         $this->stream     = $stream;

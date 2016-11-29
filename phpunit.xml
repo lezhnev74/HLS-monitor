@@ -3,7 +3,7 @@
         colors="true"
         convertErrorsToExceptions="true"
         processIsolation="false"
-        stopOnError="true"
+        stopOnFailure="true"
         strict="false"
         verbose="true"
 
