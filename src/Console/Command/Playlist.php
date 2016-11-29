@@ -15,6 +15,7 @@ class Playlist extends BaseMonitorCommand
     public function executeCommand(Args $args, IO $io, Command $command)
     {
         
+        $return_code  = 0;
         $playlist_url = $args->getArgument('PlaylistUrl');
         
         //
@@ -52,26 +53,30 @@ class Playlist extends BaseMonitorCommand
                 try {
                     $failed_chunks = $service->execute();
                     if(count($failed_chunks)) {
-                        $msg = "Stream has unaccessible chunks";
-                        foreach($failed_chunks as $chunk) {
-                            $io->writeLine("Chunk: " . $chunk['url']);
-                        }
+                        $msg = "Stream has unaccessible chunks:";
                         $io->writeLine("<error>" . $msg . "</error>");
+                        foreach($failed_chunks as $chunk) {
+                            $io->writeLine("|--Chunk: " . $chunk['url']);
+                        }
+                        $io->writeLine("|---");
+                        $return_code = 1;
                     }
                 } catch(StreamIsNotAvailable $e) {
                     $io->writeLine("<error>Stream is not accessible: " . $stream->getUrl() . "</error>");
+                    $return_code = 1;
                 }
             }
             $io->writeLine('<success>Checking Streams is DONE</success>');
             
         } catch(UrlIsNotAccessible $e) {
             $io->writeLine('<error>Playlist is not accessible from this node</error>');
-            
+            $return_code = 1;
         } catch(\Exception $e) {
             $io->writeLine('<error>Something nasty happened: ' . $e->getMessage() . '</error>');
+            $return_code = 1;
         }
         
-        return 0;
+        return $return_code;
     }
     
 }
