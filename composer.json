@@ -19,5 +19,8 @@
     "psr-4": {
       "Lezhnev74\\HLSMonitor\\": "src/"
     }
-  }
+  },
+  "bin": [
+    "bin/hls-monitor"
+  ]
 }
