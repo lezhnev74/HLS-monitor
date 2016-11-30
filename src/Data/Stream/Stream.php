@@ -2,10 +2,12 @@
 
 namespace Lezhnev74\HLSMonitor\Data\Stream;
 
+use Lezhnev74\HLSMonitor\Data\HasStatus;
 use Lezhnev74\HLSMonitor\Data\Playlist\InvalidPlaylistFormat;
 
 class Stream
 {
+    use HasStatus;
     
     private $resolution;
     private $bandwidth;

@@ -2,10 +2,13 @@
 namespace Lezhnev74\HLSMonitor\Data\Playlist;
 
 
+use Lezhnev74\HLSMonitor\Data\HasStatus;
 use Lezhnev74\HLSMonitor\Data\Stream\Stream;
 
 class Playlist
 {
+    use HasStatus;
+    
     private $playlist_content;
     private $playlist_url;
     
