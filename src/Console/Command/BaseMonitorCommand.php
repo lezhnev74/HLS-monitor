@@ -3,6 +3,7 @@
 namespace Lezhnev74\HLSMonitor\Console\Command;
 
 use Lezhnev74\HLSMonitor\Services\Downloader\CurlDownloader;
+use Lezhnev74\HLSMonitor\Services\Downloader\MultithreadedCurlDownloader;
 use Webmozart\Console\Api\Args\Args;
 use Webmozart\Console\Api\Command\Command;
 use Webmozart\Console\Api\IO\IO;
@@ -19,7 +20,7 @@ abstract class BaseMonitorCommand
         //
         // Init downloader with given behaviour
         //
-        $this->downloader = new CurlDownloader($retries, $timeout);
+        $this->downloader = new MultithreadedCurlDownloader($retries, $timeout);
         
         //
         // Detect my IP (for logs)

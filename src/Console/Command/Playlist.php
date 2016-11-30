@@ -4,6 +4,7 @@ namespace Lezhnev74\HLSMonitor\Console\Command;
 
 use Lezhnev74\HLSMonitor\Services\CheckStreamAvailable\CheckStreamAvailable;
 use Lezhnev74\HLSMonitor\Services\CheckStreamAvailable\StreamIsNotAvailable;
+use Lezhnev74\HLSMonitor\Services\CheckStreamsAvailable\CheckStreamsAvailable;
 use Lezhnev74\HLSMonitor\Services\Downloader\CurlDownloader;
 use Lezhnev74\HLSMonitor\Services\Downloader\UrlIsNotAccessible;
 use Webmozart\Console\Api\Args\Args;
@@ -48,35 +49,60 @@ class Playlist extends BaseMonitorCommand
             // 4. Validate stream's chunks
             //
             $io->writeLine('Started checking streams');
-            foreach($streams as $stream) {
-                $service = new CheckStreamAvailable($stream, $this->downloader);
-                try {
-                    $failed_chunks = $service->execute();
-                    if(count($failed_chunks)) {
-                        $msg = "Stream has unaccessible chunks:";
-                        $io->writeLine("<error>" . $msg . "</error>");
-                        foreach($failed_chunks as $chunk) {
-                            $io->writeLine("|--Chunk: " . $chunk['url']);
+            $service = new CheckStreamsAvailable($streams, $this->downloader);
+            try {
+                $failed_chunks = $service->execute();
+                if (count($failed_chunks)) {
+                    $msg = "Stream has unaccessible chunks:";
+                    $io->writeLine("<error>" . $msg . "</error>");
+                    
+                    $failed_chunks_grouped = $this->groupArrayByKey('stream_url', $failed_chunks);
+                    
+                    foreach ($failed_chunks_grouped as $stream_url => $chunks) {
+                        $io->writeLine("|--Stream: " . $stream_url);
+                        foreach ($chunks as $chunk_data) {
+                            $io->writeLine("   |--Chunk: " . $chunk_data['url']);
                         }
-                        $io->writeLine("|---");
-                        $return_code = 1;
                     }
-                } catch(StreamIsNotAvailable $e) {
-                    $io->writeLine("<error>Stream is not accessible: " . $stream->getUrl() . "</error>");
+                    $io->writeLine("");
                     $return_code = 1;
                 }
+            } catch (StreamIsNotAvailable $e) {
+                $io->writeLine("<error>Stream is not accessible: " . $e->getMessage() . "</error>");
+                $return_code = 1;
             }
             $io->writeLine('<success>Checking Streams is DONE</success>');
             
-        } catch(UrlIsNotAccessible $e) {
+        } catch (UrlIsNotAccessible $e) {
             $io->writeLine('<error>Playlist is not accessible from this node</error>');
             $return_code = 1;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $io->writeLine('<error>Something nasty happened: ' . $e->getMessage() . '</error>');
             $return_code = 1;
         }
         
         return $return_code;
+    }
+    
+    
+    /**
+     * Will group by key
+     *
+     * @param $array
+     */
+    private function groupArrayByKey($key, $array)
+    {
+        $return = [];
+        
+        foreach ($array as $item) {
+            if (!isset($return[$item[$key]])) {
+                $return[$item[$key]] = [];
+            }
+            
+            $return[$item[$key]][] = $item;
+        }
+        
+        return $return;
     }
     
 }
