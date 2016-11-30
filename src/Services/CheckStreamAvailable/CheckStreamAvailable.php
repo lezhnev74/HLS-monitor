@@ -40,7 +40,6 @@ class CheckStreamAvailable implements Service
             ];
         });
         
-        
         return $failed_chunks;
     }
     
