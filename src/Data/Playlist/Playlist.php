@@ -71,9 +71,9 @@ class Playlist
                 }
                 $url = $this->makeStreamUrl($lines[$n + 1]);
                 // do not set empty row, transform those to NULLs
-                $resolution = $p['resolution'] ? strlen($p['resolution']) ? $p['resolution'] : null : null;
-                $bandwidth  = $p['bandwidth'] ? strlen($p['bandwidth']) ? $p['bandwidth'] : null : null;
-    
+                $resolution = isset($p['resolution']) ? strlen($p['resolution']) ? $p['resolution'] : null : null;
+                $bandwidth  = isset($p['bandwidth']) ? strlen($p['bandwidth']) ? $p['bandwidth'] : null : null;
+                
                 $streams[] = new Stream($url, $resolution, $bandwidth);
             }
             

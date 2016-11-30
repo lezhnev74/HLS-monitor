@@ -10,7 +10,8 @@
     }
   ],
   "require": {
-    "webmozart/console": "~1.0@beta"
+    "webmozart/console": "~1.0@beta",
+    "stefangabos/zebra_curl": "^1.3"
   },
   "require-dev": {
     "phpunit/phpunit": "5.5.*"

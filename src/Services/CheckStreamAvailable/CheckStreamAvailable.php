@@ -26,19 +26,20 @@ class CheckStreamAvailable implements Service
     public function execute()
     {
         $chunks        = $this->getStreamChunkUrls();
+        $chunk_urls    = [];
         $failed_chunks = [];
         
-        foreach($chunks as $chunk) {
-            $chunk_url = dirname($this->stream->getUrl()) . "/" . $chunk;
-            try {
-                $this->downloader->downloadFewBytes(500, $chunk_url);
-            } catch(UrlIsNotAccessible $e) {
-                $failed_chunks[] = [
-                    'reason' => $e->getMessage(),
-                    'url' => $chunk_url,
-                ];
-            }
+        foreach ($chunks as $chunk) {
+            $chunk_urls[] = dirname($this->stream->getUrl()) . "/" . $chunk;
         }
+        
+        $this->downloader->getUnavailableUrls($chunk_urls, function ($failed_chunk_url, $reason) use (&$failed_chunks) {
+            $failed_chunks[] = [
+                'reason' => $reason,
+                'url'    => $failed_chunk_url,
+            ];
+        });
+        
         
         return $failed_chunks;
     }
@@ -57,17 +58,17 @@ class CheckStreamAvailable implements Service
         
         try {
             $stream_content = $this->downloader->downloadFullFile($this->stream->getUrl());
-        } catch(UrlIsNotAccessible $e) {
+        } catch (UrlIsNotAccessible $e) {
             throw new StreamIsNotAvailable("Stream is not available");
         }
         $lines = explode(PHP_EOL, $stream_content);
         
-        foreach($lines as $n => $line) {
-            if(preg_match("#\#EXTINF#", $line)) {
-                if(!isset($lines[ $n + 1 ])) {
+        foreach ($lines as $n => $line) {
+            if (preg_match("#\#EXTINF#", $line)) {
+                if (!isset($lines[$n + 1])) {
                     throw new InvalidPlaylistFormat("Url has invalid format on line: " . ($n + 1));
                 }
-                $urls[] = $lines[ $n + 1 ];
+                $urls[] = $lines[$n + 1];
             }
         }
         

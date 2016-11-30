@@ -25,8 +25,8 @@ abstract class BaseDownloader implements Downloader
     {
         try {
             return $this->downloadBytes($url, $limit);
-        } catch(UrlIsNotAccessible $e) {
-            if($this->shouldRetry($url)) {
+        } catch (UrlIsNotAccessible $e) {
+            if ($this->shouldRetry($url)) {
                 return $this->downloadFewBytes($limit, $url);
             } else {
                 throw $e;
@@ -38,9 +38,10 @@ abstract class BaseDownloader implements Downloader
     {
         try {
             $content = $this->downloadBytes($url);
+            
             return $content;
-        } catch(UrlIsNotAccessible $e) {
-            if($this->shouldRetry($url)) {
+        } catch (UrlIsNotAccessible $e) {
+            if ($this->shouldRetry($url)) {
                 return $this->downloadFullFile($url);
             } else {
                 throw $e;
@@ -48,15 +49,33 @@ abstract class BaseDownloader implements Downloader
         }
     }
     
+    function getUnavailableUrls($all_urls, callable $report_fail_url_closure)
+    {
+        $limit = 10;
+        foreach ($all_urls as $url) {
+            try {
+                // if no error - just call next URL
+                $this->downloadBytes($url, $limit);
+            } catch (UrlIsNotAccessible $e) {
+                if ($this->shouldRetry($url)) {
+                    return $this->downloadFewBytes($limit, $url);
+                } else {
+                    $report_fail_url_closure($url, $e->getMessage());
+                }
+            }
+        }
+    }
+    
+    
     final protected function shouldRetry(string $url): bool
     {
         // init internal counter
-        if(!isset($this->retries[ $url ])) {
-            $this->retries[ $url ] = 0;
+        if (!isset($this->retries[$url])) {
+            $this->retries[$url] = 0;
         }
         
-        if($this->retries[ $url ] < $this->max_retries) {
-            $this->retries[ $url ]++;
+        if ($this->retries[$url] < $this->max_retries) {
+            $this->retries[$url]++;
             sleep($this->timeout_seconds);
             
             return true;
@@ -64,6 +83,7 @@ abstract class BaseDownloader implements Downloader
         
         return false;
     }
+    
     
     /**
      * @param      $url

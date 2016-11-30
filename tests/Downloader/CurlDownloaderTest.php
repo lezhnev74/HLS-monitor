@@ -40,18 +40,18 @@ class CurlDownloaderTest extends \PHPUnit\Framework\TestCase
         $timeout    = 1;
         $downloader = $this->getMockBuilder(CurlDownloader::class)
                            ->setConstructorArgs([
-                                                    $retries,
-                                                    $timeout,
-                                                ])
+                               $retries,
+                               $timeout,
+                           ])
                            ->getMock();
         
         $downloader->max_retries = $retries;
         
-        $callback = function($arg) use ($retries) {
+        $callback = function ($arg) use ($retries) {
             static $made_requests = 0;
             $made_requests++;
             // last retry must succeed
-            if($made_requests == ($retries + 1)) {
+            if ($made_requests == ($retries + 1)) {
                 return "GOOD";
             } else {
                 throw new UrlIsNotAccessible();
@@ -62,6 +62,24 @@ class CurlDownloaderTest extends \PHPUnit\Framework\TestCase
         
         $this->assertEquals("GOOD", $content);
         
+    }
+    
+    
+    function test_downloader_will_report_failed_urls()
+    {
+        $urls        = [
+            'https://babystep.tv/en',
+            'https://babystep.tv/ru',
+            'https://babystep.tv/gg',
+        ];
+        $failed_urls = [];
+        
+        $downloader = new CurlDownloader();
+        $content    = $downloader->getUnavailableUrls($urls, function ($failed_url) use (&$failed_urls) {
+            $failed_urls[] = $failed_url;
+        });
+        
+        $this->assertEquals(1, count($failed_urls));
     }
     
 }
