@@ -11,6 +11,7 @@ class Playlist
     
     private $playlist_content;
     private $playlist_url;
+    private $streams;
     
     public function __construct(string $playlist_content, string $playlist_url)
     {
@@ -18,6 +19,8 @@ class Playlist
         $this->validate($playlist_content, $playlist_url);
         $this->playlist_content = $playlist_content;
         $this->playlist_url     = $playlist_url;
+        
+        $this->streams = $this->makeStreams();
     }
     
     /**
@@ -34,6 +37,15 @@ class Playlist
     public function getPlaylistUrl(): string
     {
         return $this->playlist_url;
+    }
+    
+    
+    /**
+     * @return array
+     */
+    public function getStreams(): array
+    {
+        return $this->streams;
     }
     
     
@@ -57,7 +69,14 @@ class Playlist
         }
     }
     
-    public function getStreams(): array
+    
+    /**
+     * Will parse playlist content and make streams from it
+     *
+     * @return array
+     * @throws InvalidPlaylistFormat
+     */
+    private function makeStreams(): array
     {
         $lines   = explode(PHP_EOL, $this->playlist_content);
         $streams = [];

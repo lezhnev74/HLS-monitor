@@ -12,6 +12,7 @@ class Stream
     private $resolution;
     private $bandwidth;
     private $url;
+    private $chunks;
     
     /**
      * Stream constructor.
@@ -20,7 +21,7 @@ class Stream
      * @param $bandwidth
      * @param $url
      */
-    public function __construct(string $url, string $resolution = null, string $bandwidth = null)
+    public function __construct(string $url, string $resolution = null, string $bandwidth = null, $chunks = [])
     {
         
         // Validate Url
@@ -31,6 +32,24 @@ class Stream
         $this->resolution = $resolution;
         $this->bandwidth  = $bandwidth;
         $this->url        = $url;
+        $this->chunks     = $chunks;
+    }
+    
+    /**
+     * Support immutability
+     *
+     * @param array $chunks
+     *
+     * @return static
+     */
+    public function setChunks(array $chunks)
+    {
+        return new static(
+            $this->url,
+            $this->resolution,
+            $this->bandwidth,
+            $chunks
+        );
     }
     
     /**
@@ -56,5 +75,5 @@ class Stream
     {
         return $this->url;
     }
-        
+    
 }
