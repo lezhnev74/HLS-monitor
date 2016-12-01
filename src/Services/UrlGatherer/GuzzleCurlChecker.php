@@ -26,14 +26,18 @@ class GuzzleCurlChecker implements GathersUrls
     ) {
         $promises = (function () use ($urls, $on_fail_url, $on_good_url) {
             foreach ($urls as $url) {
-                yield $this->client->requestAsync('HEAD', $url)->then(
+                yield $this->client->requestAsync('HEAD', $url, [
+                    'connect_timeout' => 10,
+                    'timeout'         => 10,
+                ])->then(
                     function (ResponseInterface $res) use ($url, $on_good_url) {
                         // on good
-                        $on_good_url($url, $res->getBody());
-                    }, function (RequestException $e) use ($url, $on_fail_url) {
-                    // on bad
-                    $on_fail_url($url, $e->getMessage());
-                }
+                        $on_good_url($url, "");
+                    },
+                    function (RequestException $e) use ($url, $on_fail_url) {
+                        // on bad
+                        $on_fail_url($url, $e->getMessage());
+                    }
                 );
             }
         })();
@@ -51,14 +55,17 @@ class GuzzleCurlChecker implements GathersUrls
     ) {
         $promises = (function () use ($urls, $on_fail_url, $on_good_url) {
             foreach ($urls as $url) {
-                yield $this->client->requestAsync('GET', $url)->then(
+                yield $this->client->requestAsync('GET', $url, [
+                    'connect_timeout' => 10,
+                ])->then(
                     function (ResponseInterface $res) use ($url, $on_good_url) {
                         // on good
-                        $on_good_url($url, $res->getBody());
-                    }, function (RequestException $e) use ($url, $on_fail_url) {
-                    // on bad
-                    $on_fail_url($url, $e->getMessage());
-                }
+                        $on_good_url($url, $res->getBody()->getContents());
+                    },
+                    function (RequestException $e) use ($url, $on_fail_url) {
+                        // on bad
+                        $on_fail_url($url, $e->getMessage());
+                    }
                 );
             }
         })();
@@ -66,7 +73,6 @@ class GuzzleCurlChecker implements GathersUrls
         (new EachPromise($promises, [
             'concurrency' => $this->concurrency,
         ]))->promise()->wait();
-        
         
     }
     
