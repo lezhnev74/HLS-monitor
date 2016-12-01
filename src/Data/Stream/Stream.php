@@ -12,6 +12,7 @@ class Stream
     private $resolution;
     private $bandwidth;
     private $url;
+    private $content;
     private $chunks;
     
     /**
@@ -21,36 +22,85 @@ class Stream
      * @param $bandwidth
      * @param $url
      */
-    public function __construct(string $url, string $resolution = null, string $bandwidth = null, $chunks = [])
+    public function __construct(string $url, string $resolution = null, string $bandwidth = null, $content = "")
     {
-        
-        // Validate Url
-        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            throw new \InvalidArgumentException("Stream URL is not valid");
-        }
         
         $this->resolution = $resolution;
         $this->bandwidth  = $bandwidth;
         $this->url        = $url;
-        $this->chunks     = $chunks;
+        $this->content    = $content;
+        
+        $this->validate();
+        $this->chunks = $this->makeChunks();
     }
     
     /**
-     * Support immutability
-     *
-     * @param array $chunks
-     *
-     * @return static
+     * Ref: https://en.wikipedia.org/wiki/M3U
      */
-    public function setChunks(array $chunks)
+    private function validate()
     {
-        return new static(
-            $this->url,
-            $this->resolution,
-            $this->bandwidth,
-            $chunks
-        );
+        // Validate Url
+        if (filter_var($this->url, FILTER_VALIDATE_URL) === false) {
+            throw new \InvalidArgumentException("Stream URL is not valid");
+        }
+        
+        // Validate content
+        $lines = explode(PHP_EOL, $this->content);
+        
+        // 1. Header is required
+        if ($lines[0] != "#EXTM3U") {
+            throw new InvalidPlaylistFormat();
+        }
+        
     }
+    
+    
+    /**
+     * Will parse playlist content and make streams from it
+     *
+     * @return array
+     * @throws InvalidPlaylistFormat
+     */
+    private function makeChunks(): array
+    {
+        $lines   = explode(PHP_EOL, $this->content);
+        $streams = [];
+        
+        foreach ($lines as $n => $line) {
+            
+            if (preg_match("#^\#EXTINF#", $line, $p)) {
+                if (!isset($lines[$n + 1])) {
+                    throw new InvalidPlaylistFormat("Frament [" . $line . "] is not followed by the file link");
+                }
+                $url = $this->makeStreamUrl($lines[$n + 1]);
+                // do not set empty row, transform those to NULLs
+                $resolution = isset($p['resolution']) ? strlen($p['resolution']) ? $p['resolution'] : null : null;
+                $bandwidth  = isset($p['bandwidth']) ? strlen($p['bandwidth']) ? $p['bandwidth'] : null : null;
+                
+                $streams[] = new Stream($url, $resolution, $bandwidth);
+            }
+            
+        }
+        
+        return $streams;
+    }
+    
+    private function makeChunkUrl($chunk_file_url)
+    {
+        $url = dirname($this->url) . "/" . $chunk_file_url;
+        
+        return $url;
+    }
+    
+    
+    /**
+     * @return mixed
+     */
+    public function getChunks()
+    {
+        return $this->chunks;
+    }
+    
     
     /**
      * @return string

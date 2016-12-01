@@ -14,14 +14,20 @@ abstract class BaseMonitorCommand
     
     public function handle(Args $args, IO $io, Command $command)
     {
+        $this->banner($io);
         
-        $retries = $args->getOption('retries');
-        $timeout = $args->getOption('timeout');
-        //
-        // Init downloader with given behaviour
-        //
-        $this->downloader = new MultithreadedCurlDownloader($retries, $timeout);
+        $code = $this->executeCommand($args, $io, $command);
         
+        return $code;
+    }
+    
+    /**
+     * Welcome user with useful information
+     *
+     * @param IO $io
+     */
+    private function banner(IO $io)
+    {
         //
         // Detect my IP (for logs)
         //
@@ -31,10 +37,6 @@ abstract class BaseMonitorCommand
         $io->writeLine("<c2>Date of execution: " . date('d.m.Y, H:i T') . "</c2>");
         $io->writeLine("<c2>#---------------------------------------------------</c2>");
         $io->writeLine("");
-        
-        $code = $this->executeCommand($args, $io, $command);
-        
-        return $code;
     }
     
     abstract protected function executeCommand(Args $args, IO $io, Command $command);

@@ -18,14 +18,14 @@ class HlsMonitorConfiguration extends DefaultApplicationConfig
         $this
             ->setName('hls-monitor')
             // command playlist
-            ->beginCommand('playlist')
+            ->beginCommand('playlists')
             ->setDescription("Validate M3U8 palylist and it's streams for accessibility")
             ->setHandler(new Playlist())
-            ->addArgument('PlaylistUrl', Argument::REQUIRED, 'The M3U8-Playlist URL to evaluate')
+            ->addArgument('PlaylistUrls', Argument::REQUIRED, 'The M3U8-Playlist URLs to evaluate (comma separated)')
             ->addOption('retries', 'r', Option::OPTIONAL_VALUE,
-                        'The maximum number of retries before considering URL as unaccessible', 3)
+                'The maximum number of retries before considering URL as unaccessible', 3)
             ->addOption('timeout', 't', Option::OPTIONAL_VALUE,
-                        'The number of seconds to wait between retries', 5)
+                'The number of seconds to wait between retries', 5)
             ->end()
             ->addStyle(Style::tag('success')->fgGreen());
         
