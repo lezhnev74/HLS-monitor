@@ -3,13 +3,8 @@
 namespace Lezhnev74\HLSMonitor\Console\Command;
 
 use Lezhnev74\HLSMonitor\Data\Playlist\InvalidPlaylistFormat;
-use Lezhnev74\HLSMonitor\Services\CheckStreamAvailable\CheckStreamAvailable;
-use Lezhnev74\HLSMonitor\Services\CheckStreamAvailable\StreamIsNotAvailable;
-use Lezhnev74\HLSMonitor\Services\CheckStreamsAvailable\CheckStreamsAvailable;
 use Lezhnev74\HLSMonitor\Services\CheckUrls\CheckUrls;
 use Lezhnev74\HLSMonitor\Services\CheckUrls\CheckUrlsRequest;
-use Lezhnev74\HLSMonitor\Services\Downloader\CurlDownloader;
-use Lezhnev74\HLSMonitor\Services\Downloader\UrlIsNotAccessible;
 use Webmozart\Console\Api\Args\Args;
 use Webmozart\Console\Api\Command\Command;
 use Webmozart\Console\Api\IO\IO;
