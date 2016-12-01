@@ -111,4 +111,43 @@ class Playlist
         
         return $url;
     }
+    
+    /**
+     * Set content for stream by his URL
+     * Will remove old object and will create a new one
+     *
+     * @param Stream $stream
+     * @param string $content
+     */
+    public function setContentForStreamUrl(string $url, string $content)
+    {
+        foreach ($this->streams as $key => $stream) {
+            if ($stream->getUrl() == $url) {
+                $this->streams[$key] = new Stream(
+                    $url,
+                    $stream->getResolution(),
+                    $stream->getBandwidth(),
+                    $content
+                );
+            }
+        }
+    }
+    
+    /**
+     * @param string $url
+     *
+     * @return Stream|null
+     */
+    public function findStreamByUrl(string $url)
+    {
+        foreach ($this->streams as $key => $stream) {
+            if ($stream->getUrl() == $url) {
+                return $stream;
+            }
+        }
+        
+        return null;
+    }
+    
+    
 }

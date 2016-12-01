@@ -22,28 +22,38 @@ class Stream
      * @param $bandwidth
      * @param $url
      */
-    public function __construct(string $url, string $resolution = null, string $bandwidth = null, $content = "")
-    {
+    public function __construct(
+        string $url,
+        string $resolution = null,
+        string $bandwidth = null,
+        string $content = null
+    ) {
         
         $this->resolution = $resolution;
         $this->bandwidth  = $bandwidth;
         $this->url        = $url;
         $this->content    = $content;
         
-        $this->validate();
-        $this->chunks = $this->makeChunks();
+        $this->validateUrl();
+        if ($content) {
+            $this->validateContent();
+        }
     }
     
     /**
      * Ref: https://en.wikipedia.org/wiki/M3U
      */
-    private function validate()
+    private function validateUrl()
     {
         // Validate Url
         if (filter_var($this->url, FILTER_VALIDATE_URL) === false) {
             throw new \InvalidArgumentException("Stream URL is not valid");
         }
         
+    }
+    
+    private function validateContent()
+    {
         // Validate content
         $lines = explode(PHP_EOL, $this->content);
         
@@ -51,7 +61,6 @@ class Stream
         if ($lines[0] != "#EXTM3U") {
             throw new InvalidPlaylistFormat();
         }
-        
     }
     
     
@@ -63,7 +72,7 @@ class Stream
      */
     private function makeChunks(): array
     {
-        $lines   = explode(PHP_EOL, $this->content);
+        $lines = explode(PHP_EOL, $this->content);
         $streams = [];
         
         foreach ($lines as $n => $line) {

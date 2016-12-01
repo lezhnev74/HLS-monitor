@@ -2,6 +2,7 @@
 
 namespace Lezhnev74\HLSMonitor\Console\Command;
 
+use Lezhnev74\HLSMonitor\Data\Playlist\InvalidPlaylistFormat;
 use Lezhnev74\HLSMonitor\Services\CheckStreamAvailable\CheckStreamAvailable;
 use Lezhnev74\HLSMonitor\Services\CheckStreamAvailable\StreamIsNotAvailable;
 use Lezhnev74\HLSMonitor\Services\CheckStreamsAvailable\CheckStreamsAvailable;
@@ -29,21 +30,6 @@ class Playlist extends BaseMonitorCommand
         $playlist_urls     = array_map(function ($url) {
             return trim($url);
         }, $all_playlist_urls);
-//        $playlist_urls     = array_filter($all_playlist_urls, function ($url) {
-//            if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-//                return false;
-//            }
-//
-//            return true;
-//        });
-//        $bad_playlist_urls = array_diff($all_playlist_urls, $playlist_urls);
-//        if (count($bad_playlist_urls)) {
-//            foreach ($bad_playlist_urls as $url) {
-//                $io->writeLine("<error>Playlist urls which was not recognized</error>");
-//            }
-//
-//            $return_code = 1;
-//        }
         
         //
         // 2. Retrieve all Playlists contents and make playlist models
@@ -92,11 +78,25 @@ class Playlist extends BaseMonitorCommand
         //
         $request = new CheckUrlsRequest(
             $stream_urls,
-            function ($url, $reason) {
-                
+            function ($url, $reason) use ($playlists) {
+                foreach ($playlists as $playlist) {
+                    if ($stream = $playlist->findStreamByUrl($url)) {
+                        $stream->reportAsNotAccessible($reason);
+                        break;
+                    }
+                }
             },
-            function ($url, $body) {
-                var_dump($body);
+            function ($url, $body) use ($playlists) {
+                // find which playlist owns this stream's url
+                foreach ($playlists as $playlist) {
+                    try {
+                        $playlist->setContentForStreamUrl($url, $body);
+                    } catch (InvalidPlaylistFormat $e) {
+                        $stream = $playlist->findStreamByUrl($url);
+                        $stream->reportAsNotAccessible("Bad content of the stream (limited to 100 chars):\n"
+                                                       . substr($body, 0, 100));
+                    }
+                }
             },
             true // gather body
         );
@@ -110,7 +110,16 @@ class Playlist extends BaseMonitorCommand
         //
         foreach ($playlists as $playlist) {
             if (!$playlist->isAccessible()) {
-                $io->writeLine('<error>Playlisst is not available: ' . $playlist->getUrl() . '</error>');
+                $io->writeLine('<error>Playlist is not available: ' . $playlist->getUrl() . '</error>');
+            } else {
+                foreach ($playlist->getStreams() as $stream) {
+                    if (!$stream->isAccessible() && $stream->isCheckedForAccessibility()) {
+                        $io->writeLine('<error>Playlist has bad Streams:</error>');
+                        $io->writeLine('  \-- Playlist URL: ' . $playlist->getPlaylistUrl());
+                        $io->writeLine('      \-- Stream url: ' . $stream->getUrl());
+                        $io->writeLine('          \-- Reason: ' . $stream->getNotAccessibleReason());
+                    }
+                }
             }
         }
         
