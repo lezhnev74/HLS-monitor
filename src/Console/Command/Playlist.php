@@ -152,21 +152,47 @@ class Playlist extends BaseMonitorCommand
             if (!$playlist->isAccessible()) {
                 $io->writeLine('<error>Playlist is not available: ' . $playlist->getUrl() . '</error>');
             } else {
+                // check streams of the playlist
+                $bad_streams = [];
                 foreach ($playlist->getStreams() as $stream) {
                     if (!$stream->isAccessible() && $stream->isCheckedForAccessibility()) {
-                        $io->writeLine('<error>Playlist has bad Streams:</error>');
-                        $io->writeLine('  \-- Playlist URL: ' . $playlist->getPlaylistUrl());
-                        $io->writeLine('      \-- Stream url: ' . $stream->getUrl());
-                        $io->writeLine('          \-- Reason: ' . $stream->getNotAccessibleReason());
+                        $bad_streams[$stream->getUrl()] = [
+                            'stream'     => $stream,
+                            'bad_chunks' => [],
+                        ];
+                    } else {
+                        // check chunks of the stream
+                        foreach ($stream->getChunks() as $chunk) {
+                            if (!$chunk->isAccessible() && $chunk->isCheckedForAccessibility()) {
+                                
+                                if (!isset($bad_streams[$stream->getUrl()])) {
+                                    $bad_streams[$stream->getUrl()] = [
+                                        'stream'     => $stream,
+                                        'bad_chunks' => [],
+                                    ];
+                                }
+                                $bad_streams[$stream->getUrl()]['bad_chunks'][] = $chunk;
+                                
+                            }
+                        }
                     }
+                }
+                
+                if (count($bad_streams)) {
+                    $io->writeLine('<error>Playlist has bad Streams:</error>');
+                    $io->writeLine('<c1>  \-- Playlist URL: ' . $playlist->getPlaylistUrl()."</c1>");
                     
-                    foreach ($stream->getChunks() as $chunk) {
-                        if (!$chunk->isAccessible() && $chunk->isCheckedForAccessibility()) {
-                            $io->writeLine('<error>Playlist has bad Chunks:</error>');
-                            $io->writeLine('  \-- Playlist URL: ' . $playlist->getPlaylistUrl());
-                            $io->writeLine('      \-- Stream url: ' . $stream->getUrl());
-                            $io->writeLine('          \-- Chunk: ' . $chunk->getUrl());
-                            $io->writeLine('              \-- Reason: ' . $stream->getNotAccessibleReason());
+                    foreach ($bad_streams as $stream_url => $stream_data) {
+                        $bad_stream = $stream_data['stream'];
+                        $io->writeLine('<c2>      \-- Stream url: ' . $bad_stream->getUrl()."</c2>");
+                        
+                        if (!$bad_stream->isAccessible() && $bad_stream->isCheckedForAccessibility()) {
+                            $io->writeLine('          \-- Reason: ' . $bad_stream->getNotAccessibleReason());
+                        } elseif (count($stream_data['bad_chunks'])) {
+                            foreach ($stream_data['bad_chunks'] as $chunk) {
+                                $io->writeLine('          \-- Chunk: ' . $chunk->getUrl());
+                                $io->writeLine('              \-- Reason: ' . $chunk->getNotAccessibleReason());
+                            }
                         }
                     }
                 }

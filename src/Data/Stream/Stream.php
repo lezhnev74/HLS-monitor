@@ -39,6 +39,8 @@ class Stream
         if ($content) {
             $this->validateContent();
             $this->chunks = $this->makeChunks();
+        } else {
+            $this->chunks = [];
         }
     }
     
