@@ -41,10 +41,11 @@ class Playlist extends BaseMonitorCommand
             //
             // Handler for bad URL
             //
-            function ($url, $reason) use (&$playlists, $io) {
+            function ($url, $reason) use (&$playlists, $io, &$return_code) {
                 // URL is not good
                 $io->writeLine("<error>Playlist URL: " . $url . "</error>");
                 $io->writeLine("  \\--" . $reason);
+                $return_code = 1;
             },
             //
             // Handler for good URL
@@ -151,6 +152,7 @@ class Playlist extends BaseMonitorCommand
         foreach ($playlists as $playlist) {
             if (!$playlist->isAccessible()) {
                 $io->writeLine('<error>Playlist is not available: ' . $playlist->getUrl() . '</error>');
+                $return_code = 1;
             } else {
                 // check streams of the playlist
                 $bad_streams = [];
@@ -179,12 +181,14 @@ class Playlist extends BaseMonitorCommand
                 }
                 
                 if (count($bad_streams)) {
+                    $return_code = 1;
+                    
                     $io->writeLine('<error>Playlist has bad Streams:</error>');
-                    $io->writeLine('<c1>  \-- Playlist URL: ' . $playlist->getPlaylistUrl()."</c1>");
+                    $io->writeLine('<c1>  \-- Playlist URL: ' . $playlist->getPlaylistUrl() . "</c1>");
                     
                     foreach ($bad_streams as $stream_url => $stream_data) {
                         $bad_stream = $stream_data['stream'];
-                        $io->writeLine('<c2>      \-- Stream url: ' . $bad_stream->getUrl()."</c2>");
+                        $io->writeLine('<c2>      \-- Stream url: ' . $bad_stream->getUrl() . "</c2>");
                         
                         if (!$bad_stream->isAccessible() && $bad_stream->isCheckedForAccessibility()) {
                             $io->writeLine('          \-- Reason: ' . $bad_stream->getNotAccessibleReason());
