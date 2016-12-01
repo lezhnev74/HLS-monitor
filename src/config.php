@@ -15,8 +15,9 @@ return [
         
         \Lezhnev74\HLSMonitor\Services\UrlGatherer\GuzzleCurlChecker::class => DI\factory(function () {
             
-            $guzzle_cli = new \GuzzleHttp\Client();
-            $instance   = new \Lezhnev74\HLSMonitor\Services\UrlGatherer\GuzzleCurlChecker($guzzle_cli);
+            $guzzle_cli  = new \GuzzleHttp\Client();
+            $concurrency = 100;
+            $instance    = new \Lezhnev74\HLSMonitor\Services\UrlGatherer\GuzzleCurlChecker($guzzle_cli, $concurrency);
             
             return $instance;
         }),
