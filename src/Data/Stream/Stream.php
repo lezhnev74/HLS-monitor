@@ -2,6 +2,7 @@
 
 namespace Lezhnev74\HLSMonitor\Data\Stream;
 
+use Lezhnev74\HLSMonitor\Data\Chunk\Chunk;
 use Lezhnev74\HLSMonitor\Data\HasStatus;
 use Lezhnev74\HLSMonitor\Data\Playlist\InvalidPlaylistFormat;
 
@@ -37,6 +38,7 @@ class Stream
         $this->validateUrl();
         if ($content) {
             $this->validateContent();
+            $this->chunks = $this->makeChunks();
         }
     }
     
@@ -72,8 +74,8 @@ class Stream
      */
     private function makeChunks(): array
     {
-        $lines = explode(PHP_EOL, $this->content);
-        $streams = [];
+        $lines  = explode(PHP_EOL, $this->content);
+        $chunks = [];
         
         foreach ($lines as $n => $line) {
             
@@ -81,17 +83,14 @@ class Stream
                 if (!isset($lines[$n + 1])) {
                     throw new InvalidPlaylistFormat("Frament [" . $line . "] is not followed by the file link");
                 }
-                $url = $this->makeStreamUrl($lines[$n + 1]);
-                // do not set empty row, transform those to NULLs
-                $resolution = isset($p['resolution']) ? strlen($p['resolution']) ? $p['resolution'] : null : null;
-                $bandwidth  = isset($p['bandwidth']) ? strlen($p['bandwidth']) ? $p['bandwidth'] : null : null;
+                $url = $this->makeChunkUrl($lines[$n + 1]);
                 
-                $streams[] = new Stream($url, $resolution, $bandwidth);
+                $chunks[] = new Chunk($url);
             }
             
         }
         
-        return $streams;
+        return $chunks;
     }
     
     private function makeChunkUrl($chunk_file_url)

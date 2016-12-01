@@ -149,5 +149,37 @@ class Playlist
         return null;
     }
     
+    /**
+     * @param string $url
+     *
+     * @return Chunk|null
+     */
+    public function findChunkByUrl(string $url)
+    {
+        foreach ($this->streams as $key => $stream) {
+            foreach ($stream->getChunks() as $chunk) {
+                if ($chunk->getUrl() == $url) {
+                    return $chunk;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Return all my stream's chunks
+     *
+     * @return array
+     */
+    public function getChunks(): array
+    {
+        $chunks = [];
+        foreach ($this->getStreams() as $stream) {
+            $chunks = array_merge($chunks, $stream->getChunks());
+        }
+        
+        return $chunks;
+    }
     
 }

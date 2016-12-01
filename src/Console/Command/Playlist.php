@@ -106,6 +106,46 @@ class Playlist extends BaseMonitorCommand
         $io->writeLine("Streams fetching is over");
         
         //
+        // 4. Prepare all Chunks URLs
+        //
+        $chunk_urls = [];
+        foreach ($playlists as $playlist) {
+            foreach ($playlist->getChunks() as $chunk) {
+                $chunk_urls[] = $chunk->getUrl();
+            }
+        }
+        
+        //
+        // 4.1.  Fetch all CHunk URLs over one service call
+        //
+        $request = new CheckUrlsRequest(
+            $chunk_urls,
+            function ($url, $reason) use ($playlists) {
+                foreach ($playlists as $playlist) {
+                    if ($chunk = $playlist->findChunkByUrl($url)) {
+                        $chunk->reportAsNotAccessible($reason);
+                        break;
+                    }
+                }
+            },
+            function ($url, $body) use ($playlists) {
+                // find which playlist owns this stream's url
+                foreach ($playlists as $playlist) {
+                    if ($chunk = $playlist->findChunkByUrl($url)) {
+                        $chunk->reportAsAccessible();
+                        break;
+                    }
+                }
+            },
+            false // skip body to save speed
+        );
+        $service = get_container()->make(CheckUrls::class, ['request' => $request]);
+        $service->execute();
+        
+        $io->writeLine("Chunks fetching is over");
+        
+        
+        //
         // Temp Reporting
         //
         foreach ($playlists as $playlist) {
@@ -118,6 +158,16 @@ class Playlist extends BaseMonitorCommand
                         $io->writeLine('  \-- Playlist URL: ' . $playlist->getPlaylistUrl());
                         $io->writeLine('      \-- Stream url: ' . $stream->getUrl());
                         $io->writeLine('          \-- Reason: ' . $stream->getNotAccessibleReason());
+                    }
+                    
+                    foreach ($stream->getChunks() as $chunk) {
+                        if (!$chunk->isAccessible() && $chunk->isCheckedForAccessibility()) {
+                            $io->writeLine('<error>Playlist has bad Chunks:</error>');
+                            $io->writeLine('  \-- Playlist URL: ' . $playlist->getPlaylistUrl());
+                            $io->writeLine('      \-- Stream url: ' . $stream->getUrl());
+                            $io->writeLine('          \-- Chunk: ' . $chunk->getUrl());
+                            $io->writeLine('              \-- Reason: ' . $stream->getNotAccessibleReason());
+                        }
                     }
                 }
             }
