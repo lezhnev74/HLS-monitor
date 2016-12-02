@@ -26,10 +26,10 @@ class GuzzleCurlChecker implements GathersUrls
         callable $on_fail_url,
         callable $on_good_url = null
     ) {
-        
-        $promises = (function () use ($urls, $on_fail_url, $on_good_url) {
+        $handled  = 0;
+        $promises = (function () use ($urls, $on_fail_url, $on_good_url, &$handled) {
             foreach ($urls as $url) {
-                yield function () use ($url, $on_good_url, $on_fail_url) {
+                yield function () use ($url, $on_good_url, $on_fail_url, &$handled, &$urls) {
                     return $this->client->headAsync($url, [
                         'connect_timeout' => 10,
                         'timeout'         => 30,
@@ -37,13 +37,17 @@ class GuzzleCurlChecker implements GathersUrls
                         'verify'          => false,
                         'allow_redirects' => false,
                     ])->then(
-                        function (ResponseInterface $res) use ($url, $on_good_url) {
+                        function (ResponseInterface $res) use ($url, $on_good_url, &$handled, &$urls) {
+                            var_dump($handled++ . " of " . count($urls));
                             // on good
                             $on_good_url($url, "");
+                            
                         },
-                        function (RequestException $e) use ($url, $on_fail_url) {
+                        function (RequestException $e) use ($url, $on_fail_url, &$handled, &$urls) {
+                            var_dump($handled++ . " of " . count($urls));
                             // on bad
                             $on_fail_url($url, $e->getMessage());
+                            
                         }
                     );
                 };
@@ -53,6 +57,12 @@ class GuzzleCurlChecker implements GathersUrls
         
         $pool    = new Pool($this->client, $promises, [
             'concurrency' => $this->concurrency,
+            'fulfilled'   => function ($response, $index) {
+                var_dump('fullfilled');
+            },
+            'rejected'    => function ($reason, $index) {
+                var_dump('rejected');
+            },
         ]);
         $promise = $pool->promise();
         $promise->wait();
