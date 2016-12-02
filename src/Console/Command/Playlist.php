@@ -55,9 +55,11 @@ class Playlist extends BaseMonitorCommand
             true // gather body
         );
         $service   = get_container()->make(CheckUrls::class, ['request' => $request]);
+        $start_at  = microtime(true);
         $service->execute();
+        $end_at = microtime(true);
         
-        $io->writeLine("Playlists fetching is over");
+        $io->writeLine("Playlists fetching is over in " . round($end_at - $start_at, 2) . "s");
         
         //
         // 3. Prepare all stream URLs for all playlists
@@ -72,7 +74,7 @@ class Playlist extends BaseMonitorCommand
         //
         // 3.1 Fetch all streams in one service call
         //
-        $request = new CheckUrlsRequest(
+        $request  = new CheckUrlsRequest(
             $stream_urls,
             function ($url, $reason) use ($playlists) {
                 foreach ($playlists as $playlist) {
@@ -96,10 +98,12 @@ class Playlist extends BaseMonitorCommand
             },
             true // gather body
         );
-        $service = get_container()->make(CheckUrls::class, ['request' => $request]);
+        $service  = get_container()->make(CheckUrls::class, ['request' => $request]);
+        $start_at = microtime(true);
         $service->execute();
+        $end_at = microtime(true);
         
-        $io->writeLine("Streams fetching is over");
+        $io->writeLine("Streams fetching is over in " . round($end_at - $start_at, 2) . "s");
         
         //
         // 4. Prepare all Chunks URLs
@@ -114,7 +118,7 @@ class Playlist extends BaseMonitorCommand
         //
         // 4.1.  Fetch all CHunk URLs over one service call
         //
-        $request = new CheckUrlsRequest(
+        $request  = new CheckUrlsRequest(
             $chunk_urls,
             function ($url, $reason) use ($playlists) {
                 foreach ($playlists as $playlist) {
@@ -135,10 +139,12 @@ class Playlist extends BaseMonitorCommand
             },
             false // skip body to save speed
         );
-        $service = get_container()->make(CheckUrls::class, ['request' => $request]);
+        $service  = get_container()->make(CheckUrls::class, ['request' => $request]);
+        $start_at = microtime(true);
         $service->execute();
+        $end_at = microtime(true);
         
-        $io->writeLine("Chunks fetching is over");
+        $io->writeLine("Chunks fetching is over in " . round($end_at - $start_at, 2) . "s");
         
         
         //

@@ -4,7 +4,9 @@ namespace Lezhnev74\HLSMonitor\Services\UrlGatherer;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Pool;
 use GuzzleHttp\Promise\EachPromise;
+use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 
 class GuzzleCurlChecker implements GathersUrls
@@ -24,27 +26,37 @@ class GuzzleCurlChecker implements GathersUrls
         callable $on_fail_url,
         callable $on_good_url = null
     ) {
+        
         $promises = (function () use ($urls, $on_fail_url, $on_good_url) {
             foreach ($urls as $url) {
-                yield $this->client->requestAsync('HEAD', $url, [
-                    'connect_timeout' => 10,
-                    'timeout'         => 30,
-                ])->then(
-                    function (ResponseInterface $res) use ($url, $on_good_url) {
-                        // on good
-                        $on_good_url($url, "");
-                    },
-                    function (RequestException $e) use ($url, $on_fail_url) {
-                        // on bad
-                        $on_fail_url($url, $e->getMessage());
-                    }
-                );
+                yield function () use ($url, $on_good_url, $on_fail_url) {
+                    return $this->client->headAsync($url, [
+                        'connect_timeout' => 10,
+                        'timeout'         => 30,
+                        'stream'          => true,
+                        'verify'          => false,
+                        'allow_redirects' => false,
+                    ])->then(
+                        function (ResponseInterface $res) use ($url, $on_good_url) {
+                            // on good
+                            $on_good_url($url, "");
+                        },
+                        function (RequestException $e) use ($url, $on_fail_url) {
+                            // on bad
+                            $on_fail_url($url, $e->getMessage());
+                        }
+                    );
+                };
             }
         })();
         
-        (new EachPromise($promises, [
+        
+        $pool    = new Pool($this->client, $promises, [
             'concurrency' => $this->concurrency,
-        ]))->promise()->wait();
+        ]);
+        $promise = $pool->promise();
+        $promise->wait();
+        
     }
     
     
@@ -57,6 +69,10 @@ class GuzzleCurlChecker implements GathersUrls
             foreach ($urls as $url) {
                 yield $this->client->requestAsync('GET', $url, [
                     'connect_timeout' => 10,
+                    'timeout'         => 30,
+                    'stream'          => true,
+                    'verify'          => false,
+                    'allow_redirects' => false,
                 ])->then(
                     function (ResponseInterface $res) use ($url, $on_good_url) {
                         // on good
@@ -76,16 +92,5 @@ class GuzzleCurlChecker implements GathersUrls
         
     }
     
-    /**
-     * Callback for each completed check on single URL
-     *
-     * @param $result
-     * @param $on_fail_url
-     * @param $on_good_url
-     */
-    private function callback($result, $on_fail_url, $on_good_url)
-    {
-        
-    }
     
 }
