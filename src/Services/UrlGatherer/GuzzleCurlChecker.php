@@ -28,7 +28,7 @@ class GuzzleCurlChecker implements GathersUrls
             foreach ($urls as $url) {
                 yield $this->client->requestAsync('HEAD', $url, [
                     'connect_timeout' => 10,
-                    'timeout'         => 10,
+                    'timeout'         => 30,
                 ])->then(
                     function (ResponseInterface $res) use ($url, $on_good_url) {
                         // on good
