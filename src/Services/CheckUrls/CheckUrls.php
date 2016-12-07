@@ -35,13 +35,15 @@ class CheckUrls implements Service
             $this->gatherer->gatherWithBody(
                 $this->request->getUrls(),
                 $this->request->getOnNonAccessibleUrl(),
-                $this->request->getOnAccessibleUrl()
+                $this->request->getOnAccessibleUrl(),
+                $this->request->getConcurrency()
             );
         } else {
             $this->gatherer->gatherWithoutBody(
                 $this->request->getUrls(),
                 $this->request->getOnNonAccessibleUrl(),
-                $this->request->getOnAccessibleUrl()
+                $this->request->getOnAccessibleUrl(),
+                $this->request->getConcurrency()
             );
         }
         

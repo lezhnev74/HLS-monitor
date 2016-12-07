@@ -15,8 +15,8 @@ class Playlist extends BaseMonitorCommand
     {
         
         $return_code = 0;
-        $retries     = $args->getOption('retries');
-        $timeout     = $args->getOption('timeout');
+        $concurrency = $args->getOption('concurrency');
+        $io->writeLine("Concurrency level:" . $concurrency);
         
         //
         // 1. Get all playlist URLs
@@ -52,7 +52,8 @@ class Playlist extends BaseMonitorCommand
                 
                 $playlists[] = $playlist;
             },
-            true // gather body
+            true, // gather body
+            $concurrency
         );
         $service   = get_container()->make(CheckUrls::class, ['request' => $request]);
         $start_at  = microtime(true);
@@ -96,7 +97,8 @@ class Playlist extends BaseMonitorCommand
                     }
                 }
             },
-            true // gather body
+            true, // gather body
+            $concurrency
         );
         $service  = get_container()->make(CheckUrls::class, ['request' => $request]);
         $start_at = microtime(true);
@@ -137,7 +139,8 @@ class Playlist extends BaseMonitorCommand
                     }
                 }
             },
-            false // skip body to save speed
+            false, // skip body to save speed
+            $concurrency
         );
         $service  = get_container()->make(CheckUrls::class, ['request' => $request]);
         $start_at = microtime(true);

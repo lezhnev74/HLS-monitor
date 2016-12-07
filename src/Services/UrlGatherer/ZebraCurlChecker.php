@@ -20,8 +20,10 @@ class ZebraCurlChecker implements GathersUrls
     function gatherWithoutBody(
         array $urls,
         callable $on_fail_url,
-        callable $on_good_url = null
+        callable $on_good_url = null,
+        int $concurrency
     ) {
+        $this->zebra_curl->threads = $concurrency;
         $this->zebra_curl->header($urls, function ($result) use ($on_fail_url, $on_good_url) {
             $this->callback($result, $on_fail_url, $on_good_url);
         });
@@ -31,8 +33,10 @@ class ZebraCurlChecker implements GathersUrls
     function gatherWithBody(
         array $urls,
         callable $on_fail_url,
-        callable $on_good_url = null
+        callable $on_good_url = null,
+        int $concurrency
     ) {
+        $this->zebra_curl->threads = $concurrency;
         $this->zebra_curl->get($urls, function ($result) use ($on_fail_url, $on_good_url) {
             $this->callback($result, $on_fail_url, $on_good_url);
         });

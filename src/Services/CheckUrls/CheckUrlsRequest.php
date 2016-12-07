@@ -8,6 +8,7 @@ class CheckUrlsRequest
     private $on_non_accessible_url;
     private $urls = [];
     private $gatherBody;
+    private $concurrency;
     
     /**
      * CheckUrlsRequest constructor.
@@ -21,7 +22,8 @@ class CheckUrlsRequest
         array $urls,
         callable $on_non_accessible_url,
         callable $on_accessible_url = null,
-        bool $gatherBody = false
+        bool $gatherBody = false,
+        int $concurrency
     ) {
         //
         // validate all URLs are valid
@@ -36,6 +38,7 @@ class CheckUrlsRequest
         $this->on_non_accessible_url = $on_non_accessible_url;
         $this->urls                  = $urls;
         $this->gatherBody            = $gatherBody;
+        $this->concurrency           = $concurrency;
     }
     
     /**
@@ -68,6 +71,14 @@ class CheckUrlsRequest
     public function isGatherBody(): bool
     {
         return $this->gatherBody;
+    }
+    
+    /**
+     * @return int
+     */
+    public function getConcurrency(): int
+    {
+        return $this->concurrency;
     }
     
     

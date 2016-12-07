@@ -13,13 +13,15 @@ interface GathersUrls
      * @param array         $urls
      * @param callable      $on_fail_url
      * @param callable|null $on_good_url
+     * @param int           $concurrency
      *
      * @return mixed
      */
     function gatherWithBody(
         array $urls,
         callable $on_fail_url,
-        callable $on_good_url = null
+        callable $on_good_url = null,
+        int $concurrency
     );
     
     /**
@@ -28,12 +30,14 @@ interface GathersUrls
      * @param array         $urls
      * @param callable      $on_fail_url
      * @param callable|null $on_good_url
+     * @param int           $concurrency
      *
      * @return mixed
      */
     function gatherWithoutBody(
         array $urls,
         callable $on_fail_url,
-        callable $on_good_url = null
+        callable $on_good_url = null,
+        int $concurrency
     );
 }

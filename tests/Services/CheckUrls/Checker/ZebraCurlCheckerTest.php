@@ -15,7 +15,7 @@ class ZebraCurlCheckerTest extends \PHPUnit\Framework\TestCase
         $checker = get_container()->get(\Lezhnev74\HLSMonitor\Services\UrlGatherer\ZebraCurlChecker::class);
         $checker->gatherWithoutBody($urls, function ($url, $reason) use (&$failed_urls) {
             $failed_urls[] = $url;
-        });
+        },null, 2);
         
         $this->assertEquals(1, count($failed_urls));
     }
