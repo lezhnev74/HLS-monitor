@@ -16,7 +16,9 @@ class Playlist extends BaseMonitorCommand
         
         $return_code = 0;
         $concurrency = $args->getOption('concurrency');
+        $log         = $args->getOption('log');
         $io->writeLine("Concurrency level:" . $concurrency);
+        $io->writeLine("Log:" . ($log ?? "disabled"));
         
         //
         // 1. Get all playlist URLs
@@ -154,8 +156,10 @@ class Playlist extends BaseMonitorCommand
         // Temp Reporting
         //
         foreach ($playlists as $playlist) {
+            $this->log($log, $playlist->getPlaylistUrl(), $playlist->isAccessible());
+            
             if (!$playlist->isAccessible()) {
-                $io->writeLine('<error>Playlist is not available: ' . $playlist->getUrl() . '</error>');
+                $io->writeLine('<error>Playlist is not available: ' . $playlist->getPlaylistUrl() . '</error>');
                 $return_code = 1;
             } else {
                 // check streams of the playlist
@@ -163,17 +167,18 @@ class Playlist extends BaseMonitorCommand
                 foreach ($playlist->getStreams() as $stream) {
                     if (!$stream->isAccessible() && $stream->isCheckedForAccessibility()) {
                         $bad_streams[$stream->getUrl()] = [
-                            'stream'     => $stream,
+                            'stream' => $stream,
                             'bad_chunks' => [],
                         ];
                     } else {
                         // check chunks of the stream
                         foreach ($stream->getChunks() as $chunk) {
+                            $this->log($log, $chunk->getUrl(), $chunk->isAccessible());
                             if (!$chunk->isAccessible() && $chunk->isCheckedForAccessibility()) {
                                 
                                 if (!isset($bad_streams[$stream->getUrl()])) {
                                     $bad_streams[$stream->getUrl()] = [
-                                        'stream'     => $stream,
+                                        'stream' => $stream,
                                         'bad_chunks' => [],
                                     ];
                                 }
@@ -232,4 +237,11 @@ class Playlist extends BaseMonitorCommand
         return $return;
     }
     
+    private function log(string $log, string $url, bool $accessible)
+    {
+        if ($log) {
+            $string = ($accessible ? "[GOOD]" : "[BAD]") . $url . "\n";
+            file_put_contents($log, $string, FILE_APPEND);
+        }
+    }
 }

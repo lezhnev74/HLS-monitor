@@ -22,8 +22,8 @@ class HlsMonitorConfiguration extends DefaultApplicationConfig
             ->setDescription("Validate M3U8 palylist and it's streams for accessibility")
             ->setHandler(new Playlist())
             ->addArgument('PlaylistUrls', Argument::REQUIRED, 'The M3U8-Playlist URLs to evaluate (comma separated)')
-            ->addOption('concurrency', 'c', Option::OPTIONAL_VALUE,
-                'Threads to download files simultaneously', 30)
+            ->addOption('concurrency', 'c', Option::OPTIONAL_VALUE, 'Threads to download files simultaneously', 30)
+            ->addOption('log', 'l', Option::OPTIONAL_VALUE, 'File to output the results to')
             ->end()
             ->addStyle(Style::tag('success')->fgGreen());
         
