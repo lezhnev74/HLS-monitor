@@ -11,7 +11,7 @@ Package comes with a console file located at `vendor/bin/hls-monitor`. Check tha
 
 
 ```
-vendor/bin/hls-monitor playlists --log log.txt --concurrency=10 http://akamai.streamroot.edgesuite.net/vodorigin/tos.mp4/playlist.m3u8
+vendor/bin/hls-monitor playlists --log log.txt --concurrency=10 https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8
 ```
 
 Output will be something like this:

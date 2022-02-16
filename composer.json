@@ -1,32 +1,33 @@
 {
-  "name": "lezhnev74/hls-monitor",
-  "description": "Console script to monitor that HLS links are accessible (supports adaptive streaming)",
-  "type": "project",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Dmitriy Lezhnev",
-      "email": "lezhnev.work@gmail.com"
-    }
-  ],
-  "require": {
-    "webmozart/console": "~1.0@beta",
-    "stefangabos/zebra_curl": "^1.3",
-    "php-di/php-di": "^5.4",
-    "guzzlehttp/guzzle": "^6.2"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "5.5.*"
-  },
-  "autoload": {
-    "psr-4": {
-      "Lezhnev74\\HLSMonitor\\": "src/"
+    "name": "lezhnev74/hls-monitor",
+    "description": "Console script to monitor that HLS links are accessible (supports adaptive streaming)",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dmitriy Lezhnev",
+            "email": "lezhnev.work@gmail.com"
+        }
+    ],
+    "require": {
+        "webmozart/console": "~1.0@beta",
+        "stefangabos/zebra_curl": "^1.3",
+        "php-di/php-di": "^5.4",
+        "guzzlehttp/guzzle": "^6.2",
+        "ext-curl": "*"
     },
-    "files": [
-      "src/bootstrap.php"
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lezhnev74\\HLSMonitor\\": "src/"
+        },
+        "files": [
+            "src/bootstrap.php"
+        ]
+    },
+    "bin": [
+        "bin/hls-monitor"
     ]
-  },
-  "bin": [
-    "bin/hls-monitor"
-  ]
 }
